@@ -1,7 +1,7 @@
 <div align="center">
 <img src="./docs/images/icon.jpg" alt="icon" height="160"/>
 
-<h1 align="center">ChatLLM Web</h1>
+<h1 align="center">DBWeb LLM</h1>
 <h2 align="center">🚀 Check the AI search engine https://discovai.io, discover top ai tools that best match your need</h2>
 
 English / [简体中文](./docs/README_CN.md) / [日本語](./docs/README_JA.md)
@@ -63,7 +63,7 @@ English / [简体中文](./docs/README_CN.md) / [日本語](./docs/README_JA.md)
 ## Deploy to Vercel
 
 1. Click
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FRyan-yang125%2FChatLLM-Web&project-name=chat-llm-web&repository-name=ChatLLM-Web), follow the instructions, and finish in just 1 minute.
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/MuhammadAdil-Developer/DBWebLLM), follow the instructions, and finish in just 1 minute.
 2. Enjoy it 😊
 
 ## Development
