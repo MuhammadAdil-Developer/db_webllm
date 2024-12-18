@@ -23,13 +23,7 @@ function BottomSettings() {
             <IconSetting />
           </button>
         </div>
-        <Link
-          href="https://github.com/Ryan-yang125/ChatLLM-Web"
-          target="_blank"
-          className="btn btn-ghost btn-xs"
-        >
-          <Image src="github-mark-white.svg" alt="" width={24} height={24} />
-        </Link>
+
       </div>
       <button
         onClick={chatStore.newConversation}
@@ -73,15 +67,10 @@ export const Sidebar = () => {
   return (
     <div className="top-0 p-2 flex flex-col relative max-h-[100vh] h-[100vh]">
       <div className="bg-base-200 bg-opacity-90 backdrop-blur sticky top-0 items-center gap-2 px-4 py-2">
-        <Link
-          href="https://github.com/Ryan-yang125/ChatLLM-Web"
-          target="_blank"
-          className="btn btn-ghost px-2"
-        >
+
           <div className="font-title transition-all duration-200 md:text-2xl">
-            <div className="my-1 text-xl font-bold capitalize">ChatLLM-Web</div>
+            <div className="my-1 text-xl font-bold capitalize">Ai Data Reporting</div>
           </div>
-        </Link>
         <div className="text-base-content text-xs opacity-40 font-bold px-2">
           AI assitant running in browser.
         </div>
