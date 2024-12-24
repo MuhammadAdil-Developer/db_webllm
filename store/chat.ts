@@ -35,6 +35,10 @@ function createEmptyConversation(): ChatConversation {
     title: 'New Conversation',
   };
 }
+interface Conversation {
+  thread_id: string;
+  messages: any[];
+}
 
 export interface ChatStore {
   conversations: ChatConversation[];
@@ -43,7 +47,8 @@ export interface ChatStore {
   initInfoTmp: InitInfo;
   debugMode: boolean;
   newConversation: () => void;
-  
+  clearChatState: () => void;  
+
   delConversation: (index: number) => void;
   chooseConversation: (index: number) => void;
   delAllConversations: () => void;
@@ -58,6 +63,8 @@ export interface ChatStore {
   workerMessageCb: (data: ResFromWorkerMessageEventData) => void;
   setWorkerConversationHistroy: () => void;
   setCurConversationIndex: (index: number) => void;
+  setConversationMessages: (threadId: string, messages: any[]) => void;
+
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -68,12 +75,13 @@ export const useChatStore = create<ChatStore>()(
       
       setCurConversationIndex: (index: number) => set({ curConversationIndex: index }),
       setConversations: (conversations: any[]) => set({ conversations }),
-      clearChatState: () => set({ /* reset your chat state here */ }),
-      setConversationMessages: (threadId, messages) => set((state) => ({
+      
+      clearChatState: () => set({ curConversationIndex: -1 }),
+      setConversationMessages: (threadId: string, messages: any) => set((state) => ({
         ...state,
         [threadId]: messages,
       })),
-    
+      
       instructionModalStatus: true,
       debugMode: process.env.NODE_ENV === 'development',
       initInfoTmp: {
@@ -91,6 +99,18 @@ export const useChatStore = create<ChatStore>()(
         });
         get().setWorkerConversationHistroy();
       },
+      
+      setConversationMessages: (threadId, messages) => {
+        set((state) => {
+          const updatedConversations = state.conversations.map((conversation) =>
+            conversation.thread_id === threadId
+              ? { ...conversation, messages }
+              : conversation
+          );
+          return { conversations: updatedConversations };
+        });
+      },
+    
       
       delAllConversations() {
         set({
