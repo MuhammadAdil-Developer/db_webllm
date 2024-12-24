@@ -295,26 +295,26 @@ export function ChatBox({ threadId }: { threadId: string }) {
 <div className="relative bottom-0 p-4">
   <div className="bg-base-100 flex items-center justify-center h-full z-30 relative">
     <div className="relative w-[50%]">
-      <textarea
-        className="textarea textarea-primary textarea-bordered textarea-sm w-full pr-10 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-200 transition-all duration-300 ease-in-out"
-        placeholder="What insights are you looking for today?"
-        value={userInput}
-        onChange={(e) => setUserInput(e.currentTarget.value)}
-        onInput={(e) => onInput(e.currentTarget.value)}
-        onFocus={(e) => {
-          setAutoScroll(true);
-          e.target.classList.add('textarea-focus');
-        }}
-        onBlur={(e) => {
-          setAutoScroll(false);
-          e.target.classList.remove('textarea-focus');
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-            submitUserInput();
-          }
-        }}
-      />
+    <textarea
+  className="textarea textarea-primary textarea-bordered textarea-sm w-full pr-10 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-200 transition-all duration-300 ease-in-out"
+  placeholder="What insights are you looking for today?"
+  value={userInput}
+  onChange={(e) => setUserInput(e.currentTarget.value)}
+  onFocus={(e) => {
+    setAutoScroll(true);
+    e.target.classList.add('textarea-focus');
+  }}
+  onBlur={(e) => {
+    setAutoScroll(false);
+    e.target.classList.remove('textarea-focus');
+  }}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+      submitUserInput();
+    }
+  }}
+/>
+
       {/* Button inside the textarea */}
       <button
         onClick={submitUserInput}
@@ -329,3 +329,6 @@ export function ChatBox({ threadId }: { threadId: string }) {
     </div>
   );
 }
+
+
+
