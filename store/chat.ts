@@ -89,10 +89,6 @@ export const useChatStore = create<ChatStore>()(
       setConversations: (conversations: any[]) => set({ conversations }),
       
       clearChatState: () => set({ curConversationIndex: -1 }),
-      setConversationMessages: (threadId: string, messages: any) => set((state) => ({
-        ...state,
-        [threadId]: messages,
-      })),
       
       instructionModalStatus: true,
       debugMode: process.env.NODE_ENV === 'development',
