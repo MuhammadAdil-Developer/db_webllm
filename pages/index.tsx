@@ -20,6 +20,7 @@ export function Loading() {
     </div>
   );
 }
+
 const Sidebar = dynamic(
   async () => (await import('../components/SideBar')).Sidebar,
   {
@@ -45,24 +46,33 @@ const useHasHydrated = () => {
 };
 
 function Home() {
-  const [setWorkerConversationHistroy] = useChatStore((state) => [
+  const [setWorkerConversationHistroy, curConversationIndex, conversations] = useChatStore((state) => [
     state.setWorkerConversationHistroy,
+    state.curConversationIndex,
+    state.conversations,
   ]);
+
   useEffect(() => {
     setWorkerConversationHistroy();
-  }, []);
+  }, [setWorkerConversationHistroy]);
+
   const loading = !useHasHydrated();
   if (loading) {
     return <Loading />;
   }
+
+  // Get the current threadId from the conversations state
+  const threadId = curConversationIndex >= 0 && curConversationIndex < conversations.length
+    ? conversations[curConversationIndex].thread_id
+    : '';
 
   return (
     <>
       <div className="bg-base-100 drawer drawer-mobile">
         <input id="my-drawer" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content p-2">
-          {/* <label htmlFor="my-drawer" className="btn btn-primary drawer-button">Open drawer</label> */}
-          <ChatBox />
+          {/* Pass the threadId prop to ChatBox */}
+          <ChatBox threadId={threadId} />
         </div>
         <div className="drawer-side">
           <label htmlFor="my-drawer" className="drawer-overlay"></label>
@@ -78,5 +88,3 @@ function Home() {
 }
 
 export default Home;
-
-
