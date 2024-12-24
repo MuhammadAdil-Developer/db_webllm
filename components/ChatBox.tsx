@@ -40,8 +40,9 @@ const shouldSubmit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 export function ChatBox({ threadId }: { threadId: string }) {
   const [userInput, setUserInput] = useState('');
   const [messages, setMessages] = useState<
-    { type: 'user' | 'assistant'; content: string; timestamp: string; isLoading?: boolean }[]
-  >([]);
+  { type: "user" | "assistant"; content: string; timestamp: string; isLoading?: boolean }[]
+>([]);
+
   const [loading, setLoading] = useState(false);
   const { scrollRef, setAutoScroll, scrollToBottom } = useScrollToBottom();
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(threadId);
@@ -113,16 +114,24 @@ export function ChatBox({ threadId }: { threadId: string }) {
       } catch (error) {
         console.error('Failed to fetch threads:', error);
       }
-    };
+    };  
+
+    interface Message {
+      type: "assistant" | "user";
+      content: string;
+      timestamp: string;
+      isLoading?: boolean;
+    }
+    
   
-    const newUserMessage = {
-      type: 'user',
+    const newUserMessage: Message = {
+      type: "user", 
       content: userInput,
       timestamp: getCurrentTimestamp(),
     };
   
     setMessages((prev) => [...prev, newUserMessage]);
-    setUserInput('');
+    setInputMessage("");
     setAutoScroll(true);
   
     try {
@@ -319,3 +328,18 @@ export function ChatBox({ threadId }: { threadId: string }) {
     </div>
   );
 }
+
+
+Type error: Argument of type '(prev: { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]) => { type: string; content: string; timestamp: string; }[]' is not assignable to parameter of type 'SetStateAction<{ type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]>'.
+  Type '(prev: { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]) => { type: string; content: string; timestamp: string; }[]' is not assignable to type '(prevState: { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]) => { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]'.
+    Type '{ type: string; content: string; timestamp: string; }[]' is not assignable to type '{ type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]'.
+      Type '{ type: string; content: string; timestamp: string; }' is not assignable to type '{ type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }'.
+        Types of property 'type' are incompatible.
+          Type 'string' is not assignable to type '"assistant" | "user"'.
+  122 |     };
+  123 |   
+> 124 |     setMessages((prev) => [...prev, newUserMessage]);
+      |                 ^
+  125 |     setUserInput('');
+  126 |     setAutoScroll(true);
+  127 |   
