@@ -67,6 +67,10 @@ export interface ChatStore {
 
 }
 
+interface ChatConversation {
+  threadId: string;
+}
+
 export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => ({
