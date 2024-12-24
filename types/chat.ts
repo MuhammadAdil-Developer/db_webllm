@@ -11,13 +11,15 @@ export type Message = {
   statsText?: string;
 };
 
-export type ChatConversation = {
+export interface ChatConversation {
+  thread_id: string;
   id: number;
   messages: Message[];
   createTime: string;
   updateTime: string;
   title: string;
-};
+}
+
 
 export type UpdateBotMsg = (msg: Partial<Message>) => void;
 
