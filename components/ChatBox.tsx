@@ -328,18 +328,3 @@ export function ChatBox({ threadId }: { threadId: string }) {
     </div>
   );
 }
-
-
-Type error: Argument of type '(prev: { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]) => { type: string; content: string; timestamp: string; }[]' is not assignable to parameter of type 'SetStateAction<{ type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]>'.
-  Type '(prev: { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]) => { type: string; content: string; timestamp: string; }[]' is not assignable to type '(prevState: { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]) => { type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]'.
-    Type '{ type: string; content: string; timestamp: string; }[]' is not assignable to type '{ type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }[]'.
-      Type '{ type: string; content: string; timestamp: string; }' is not assignable to type '{ type: "assistant" | "user"; content: string; timestamp: string; isLoading?: boolean | undefined; }'.
-        Types of property 'type' are incompatible.
-          Type 'string' is not assignable to type '"assistant" | "user"'.
-  122 |     };
-  123 |   
-> 124 |     setMessages((prev) => [...prev, newUserMessage]);
-      |                 ^
-  125 |     setUserInput('');
-  126 |     setAutoScroll(true);
-  127 |   
