@@ -115,32 +115,24 @@ export function ChatBox({ threadId }: { threadId: string }) {
       } catch (error) {
         console.error('Failed to fetch threads:', error);
       }
-    };  
-
+    };
+  
     interface Message {
       type: "assistant" | "user";
       content: string;
       timestamp: string;
       isLoading?: boolean;
     }
-    
-  
-    const submitUserInput = async () => {
-      if (userInput.trim().length === 0 || loading) return;
-  
-      const newUserMessage: Message = {
-        type: "user", 
-        content: userInput,
-        timestamp: getCurrentTimestamp(),
-      };
-    
-      setMessages((prev) => [...prev, newUserMessage]);
-      setUserInput(""); // Changed from setInputMessage to setUserInput
-      setAutoScroll(true);
-  
-      // ... rest of the function
+    const newUserMessage: Message = {
+      type: "user", 
+      content: userInput,
+      timestamp: getCurrentTimestamp(),
     };
-    
+  
+    setMessages((prev) => [...prev, newUserMessage]);
+    setUserInput("");
+    setAutoScroll(true);
+  
     try {
       setLoading(true);
   
@@ -150,26 +142,26 @@ export function ChatBox({ threadId }: { threadId: string }) {
       ]);
   
       const url = currentThreadId
-      ? `http://127.0.0.1:8000/chat?thread_id=${currentThreadId}`
-      : 'http://127.0.0.1:8000/chat';
-
-    const response = await axios.post(url, {
-      message: newUserMessage.content,
-    });
-
-    const data = response.data;
-    const aiResponse = data.Ai_response?.[0] || 'No response received.';
-
-    if (data.thread_id) {
-      setCurrentThreadId(data.thread_id);
-      window.history.pushState({}, '', `/chat/${data.thread_id}`);
-      
-      // Trigger sidebar refresh after getting new thread_id
-      if ((window as any).refreshSidebarThreads) {
-        (window as any).refreshSidebarThreads();
+        ? `http://127.0.0.1:8000/chat?thread_id=${currentThreadId}`
+        : 'http://127.0.0.1:8000/chat';
+  
+      // Now we can safely reference newUserMessage
+      const response = await axios.post(url, {
+        message: newUserMessage.content,
+      });
+  
+      const data = response.data;
+      const aiResponse = data.Ai_response?.[0] || 'No response received.';
+  
+      if (data.thread_id) {
+        setCurrentThreadId(data.thread_id);
+        window.history.pushState({}, '', `/chat/${data.thread_id}`);
+        
+        // Trigger sidebar refresh after getting new thread_id
+        if ((window as any).refreshSidebarThreads) {
+          (window as any).refreshSidebarThreads();
+        }
       }
-    }
-
   
       setMessages((prev) => {
         const updatedMessages = [...prev];
@@ -195,6 +187,8 @@ export function ChatBox({ threadId }: { threadId: string }) {
   };
   
 
+
+  
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (shouldSubmit(e)) {
       submitUserInput();
