@@ -60,6 +60,7 @@ export function ChatBox({ threadId }: { threadId: string }) {
         const aiResponses = response.data.Ai_response || [];
   
         // Create paired message array
+        
         const allMessages: { type: 'user' | 'assistant'; content: string; timestamp: string }[] = [];
         const maxLength = Math.max(humanMessages.length, aiResponses.length);
         for (let i = 0; i < maxLength; i++) {
@@ -124,16 +125,22 @@ export function ChatBox({ threadId }: { threadId: string }) {
     }
     
   
-    const newUserMessage: Message = {
-      type: "user", 
-      content: userInput,
-      timestamp: getCurrentTimestamp(),
+    const submitUserInput = async () => {
+      if (userInput.trim().length === 0 || loading) return;
+  
+      const newUserMessage: Message = {
+        type: "user", 
+        content: userInput,
+        timestamp: getCurrentTimestamp(),
+      };
+    
+      setMessages((prev) => [...prev, newUserMessage]);
+      setUserInput(""); // Changed from setInputMessage to setUserInput
+      setAutoScroll(true);
+  
+      // ... rest of the function
     };
-  
-    setMessages((prev) => [...prev, newUserMessage]);
-    setInputMessage("");
-    setAutoScroll(true);
-  
+    
     try {
       setLoading(true);
   
