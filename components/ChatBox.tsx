@@ -283,31 +283,40 @@ export function ChatBox({ threadId }: { threadId: string }) {
   )}
 </div>
 
-      {/* Input area */}
-      <div className="relative bottom-0 p-4">
-        <div className="bg-base-100 flex items-center justify-center h-full z-30">
-          <textarea
-            className="textarea textarea-primary textarea-bordered textarea-sm w-[50%] focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-200 transition-all duration-300 ease-in-out"
-            placeholder="What insights are you looking for today?"
-            value={userInput}
-            onChange={(e) => setUserInput(e.currentTarget.value)}
-            onFocus={() => setAutoScroll(true)}
-            onBlur={() => setAutoScroll(false)}
-            onKeyDown={(e) => {
-              // Check if Enter key is pressed and if it's not a composing event
-              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                submitUserInput();
-              }
-            }} // Handles Enter key submission
-          />
-          <button
-            onClick={submitUserInput}
-            className="btn btn-ghost btn-xs ml-2 flex items-center justify-center"
-          >
-            <IconSend />
-          </button>
-        </div>
-      </div>
+<div className="relative bottom-0 p-4">
+  <div className="bg-base-100 flex items-center justify-center h-full z-30 relative">
+    <div className="relative w-[50%]">
+      <textarea
+        className="textarea textarea-primary textarea-bordered textarea-sm w-full pr-10 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-200 transition-all duration-300 ease-in-out"
+        placeholder="What insights are you looking for today?"
+        value={userInput}
+        onChange={(e) => setUserInput(e.currentTarget.value)}
+        onInput={(e) => onInput(e.currentTarget.value)}
+        onFocus={(e) => {
+          setAutoScroll(true);
+          e.target.classList.add('textarea-focus');
+        }}
+        onBlur={(e) => {
+          setAutoScroll(false);
+          e.target.classList.remove('textarea-focus');
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+            submitUserInput();
+          }
+        }}
+      />
+      {/* Button inside the textarea */}
+      <button
+        onClick={submitUserInput}
+        className="absolute top-5 right-2 btn btn-ghost btn-xs flex items-center justify-center"
+      >
+        <IconSend />
+      </button>
+    </div>
+  </div>
+</div>
+
     </div>
   );
 }
