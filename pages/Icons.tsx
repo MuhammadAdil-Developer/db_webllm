@@ -175,3 +175,7 @@ export function IconAdd() {
     </svg>
   );
 }
+
+
+
+export default IconSetting;
