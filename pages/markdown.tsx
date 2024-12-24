@@ -98,6 +98,9 @@ export function Markdown(
     defaultShow?: boolean;
   } & React.DOMAttributes<HTMLDivElement>,
 ) {
+  // Ensure message and content are available
+  const messageContent = props.message?.content || 'No content available';
+
   return (
     <MemoizedReactMarkdown
       className="prose dark:prose-invert flex-1 chat-markdown"
@@ -153,10 +156,11 @@ export function Markdown(
         },
       }}
     >
-      {props.message.content}
+      {messageContent}
     </MemoizedReactMarkdown>
   );
 }
+
 CodeBlock.displayName = 'CodeBlock';
 
 
