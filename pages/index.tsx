@@ -63,8 +63,9 @@ function Home() {
 
   // Get the current threadId from the conversations state
   const threadId = curConversationIndex >= 0 && curConversationIndex < conversations.length
-    ? conversations[curConversationIndex].threadId // Use threadId instead of thread_id
-    : '';
+  ? conversations[curConversationIndex].thread_id
+  : '';
+
 
   return (
     <>
@@ -88,3 +89,6 @@ function Home() {
 }
 
 export default Home;
+
+
+
