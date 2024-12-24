@@ -32,21 +32,19 @@ const useHasHydrated = () => {
 };
 
 function ChatPage() {
-  const [setWorkerConversationHistroy] = useChatStore((state) => [
-    state.setWorkerConversationHistroy,
-  ]);
+  const setWorkerConversationHistroy = useChatStore((state) => state.setWorkerConversationHistroy);
 
   useEffect(() => {
-    setWorkerConversationHistroy();
-  }, []);
+    setWorkerConversationHistroy();  // Call the function to update state
+  }, [setWorkerConversationHistroy]);  // Dependency array for useEffect
+
+  const router = useRouter();  // Move useRouter to the top of the component
+  const { threadId } = router.query; // Get thread_id from URL
 
   const loading = !useHasHydrated();
   if (loading) {
     return <Loading />;
   }
-
-  const router = useRouter();
-  const { threadId } = router.query; // Get thread_id from URL
 
   return (
     <>
