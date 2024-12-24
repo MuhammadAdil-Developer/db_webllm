@@ -39,7 +39,7 @@ function createEmptyConversation(): ChatConversation {
     title: 'New Conversation',
   };
 }
-interface ChatConversation {
+interface Conversation {
   thread_id: string;
   id: number;  // Add this field if it's missing
   messages: Message[];
