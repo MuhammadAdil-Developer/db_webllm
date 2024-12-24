@@ -2,7 +2,7 @@ import { WebLLMInstance } from '@/hooks/web-llm';
 
 import { testMdStr } from '@/utils/codeblock';
 
-import { ChatConversation as ImportedChatConversation, InitInfo, Message } from '@/types/chat';
+import { ChatConversation, InitInfo, Message } from '@/types/chat';
 import { ResFromWorkerMessageEventData } from '@/types/web-llm';
 
 import { create } from 'zustand';
@@ -17,7 +17,6 @@ export const newMessage = (p: Partial<Message>): Message => ({
   type: 'user',
   content: '',
   ...p,
-  
 });
 
 export const DEFAULT_BOT_GREETING = newMessage({
@@ -31,14 +30,20 @@ function createEmptyConversation(): ChatConversation {
   return {
     id: Date.now(),
     messages: [],
+    thread_id: '',  
     createTime: curTime,
     updateTime: curTime,
     title: 'New Conversation',
   };
 }
-interface Conversation {
+interface ChatConversation {
   thread_id: string;
-  messages: any[];
+  id: number;  // Add this field if it's missing
+  messages: Message[];
+  createTime: string;
+  updateTime: string;
+  title: string;
+
 }
 
 export interface ChatStore {
@@ -47,6 +52,7 @@ export interface ChatStore {
   instructionModalStatus: boolean;
   initInfoTmp: InitInfo;
   debugMode: boolean;
+
   newConversation: () => void;
   clearChatState: () => void;  
 
@@ -68,9 +74,7 @@ export interface ChatStore {
 
 }
 
-interface ChatConversation {
-  threadId: string;
-}
+
 
 export const useChatStore = create<ChatStore>()(
   persist(
