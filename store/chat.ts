@@ -2,7 +2,7 @@ import { WebLLMInstance } from '@/hooks/web-llm';
 
 import { testMdStr } from '@/utils/codeblock';
 
-import { ChatConversation, InitInfo, Message } from '@/types/chat';
+import { ChatConversation as ImportedChatConversation, InitInfo, Message } from '@/types/chat';
 import { ResFromWorkerMessageEventData } from '@/types/web-llm';
 
 import { create } from 'zustand';
@@ -17,6 +17,7 @@ export const newMessage = (p: Partial<Message>): Message => ({
   type: 'user',
   content: '',
   ...p,
+  
 });
 
 export const DEFAULT_BOT_GREETING = newMessage({
