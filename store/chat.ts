@@ -43,6 +43,7 @@ export interface ChatStore {
   initInfoTmp: InitInfo;
   debugMode: boolean;
   newConversation: () => void;
+  
   delConversation: (index: number) => void;
   chooseConversation: (index: number) => void;
   delAllConversations: () => void;
@@ -56,6 +57,7 @@ export interface ChatStore {
   toggleInitModal: (toggle: boolean) => void;
   workerMessageCb: (data: ResFromWorkerMessageEventData) => void;
   setWorkerConversationHistroy: () => void;
+  setCurConversationIndex: (index: number) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -63,6 +65,15 @@ export const useChatStore = create<ChatStore>()(
     (set, get) => ({
       curConversationIndex: 0,
       conversations: [createEmptyConversation()],
+      
+      setCurConversationIndex: (index: number) => set({ curConversationIndex: index }),
+      setConversations: (conversations: any[]) => set({ conversations }),
+      clearChatState: () => set({ /* reset your chat state here */ }),
+      setConversationMessages: (threadId, messages) => set((state) => ({
+        ...state,
+        [threadId]: messages,
+      })),
+    
       instructionModalStatus: true,
       debugMode: process.env.NODE_ENV === 'development',
       initInfoTmp: {
@@ -80,7 +91,7 @@ export const useChatStore = create<ChatStore>()(
         });
         get().setWorkerConversationHistroy();
       },
-
+      
       delAllConversations() {
         set({
           curConversationIndex: 0,
@@ -142,7 +153,7 @@ export const useChatStore = create<ChatStore>()(
           msg: '',
         });
       },
-
+      
       async onUserInputContent(content) {
         const userMessage: Message = newMessage({
           type: 'user',
@@ -277,3 +288,6 @@ export const useChatStore = create<ChatStore>()(
     },
   ),
 );
+
+
+

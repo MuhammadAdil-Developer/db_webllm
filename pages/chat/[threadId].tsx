@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
-
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
-
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import { ChatBox } from '../../components/ChatBox';
 import { InitModal, InstructionModal } from '@/components/InitModal';
 
 import { useChatStore } from '@/store/chat';
@@ -10,28 +9,16 @@ import { useChatStore } from '@/store/chat';
 export function Loading() {
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
-      <Image
-        src="loading.svg"
-        alt=""
-        width={30}
-        height={14}
-        className="invert-[0.5]"
-      />
+      {/* Add any loading content here */}
     </div>
   );
 }
-const Sidebar = dynamic(
-  async () => (await import('../components/SideBar')).Sidebar,
-  {
-    loading: () => <Loading />,
-  },
-);
 
-const ChatBox = dynamic(
-  async () => (await import('../components/ChatBox')).ChatBox,
+const Sidebar = dynamic(
+  async () => (await import('../../components/SideBar')).Sidebar,
   {
     loading: () => <Loading />,
-  },
+  }
 );
 
 const useHasHydrated = () => {
@@ -44,25 +31,29 @@ const useHasHydrated = () => {
   return hasHydrated;
 };
 
-function Home() {
+function ChatPage() {
   const [setWorkerConversationHistroy] = useChatStore((state) => [
     state.setWorkerConversationHistroy,
   ]);
+
   useEffect(() => {
     setWorkerConversationHistroy();
   }, []);
+
   const loading = !useHasHydrated();
   if (loading) {
     return <Loading />;
   }
+
+  const router = useRouter();
+  const { threadId } = router.query; // Get thread_id from URL
 
   return (
     <>
       <div className="bg-base-100 drawer drawer-mobile">
         <input id="my-drawer" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content p-2">
-          {/* <label htmlFor="my-drawer" className="btn btn-primary drawer-button">Open drawer</label> */}
-          <ChatBox />
+          <ChatBox threadId={threadId as string} />
         </div>
         <div className="drawer-side">
           <label htmlFor="my-drawer" className="drawer-overlay"></label>
@@ -77,6 +68,4 @@ function Home() {
   );
 }
 
-export default Home;
-
-
+export default ChatPage;

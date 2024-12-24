@@ -1,14 +1,12 @@
-import React from 'react';
-
-import Image from 'next/image';
-import Link from 'next/link';
-
+import { useRouter } from 'next/router';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { IconAdd, IconInfo, IconSetting } from './Icons';
-
 import { useChatStore } from '@/store/chat';
 
-function BottomSettings() {
+function BottomSettings({ onNewConversation }: { onNewConversation: () => void }) {
   const chatStore = useChatStore();
+
   return (
     <div className="flex items-center justify-between py-5 relative bottom-0 px-4">
       <div className="flex">
@@ -23,10 +21,9 @@ function BottomSettings() {
             <IconSetting />
           </button>
         </div>
-
       </div>
       <button
-        onClick={chatStore.newConversation}
+        onClick={onNewConversation}
         className="btn btn-ghost btn-xs"
       >
         <IconAdd />
@@ -35,63 +32,111 @@ function BottomSettings() {
   );
 }
 
-export const ChatItem = (props: {
-  onClick?: () => void;
-  title: string;
-  timeText: string;
-  index: number;
-  messageCount: number;
-  isActive: boolean;
-}) => {
+export const Sidebar = () => {
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const {
+    curConversationIndex,
+    setCurConversationIndex,
+    clearChatState,
+    setConversationMessages,
+  } = useChatStore(state => ({
+    curConversationIndex: state.curConversationIndex,
+    setCurConversationIndex: state.setCurConversationIndex,
+    clearChatState: state.clearChatState,
+    setConversationMessages: state.setConversationMessages,
+  }));
+
+  const fetchThreadIds = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://127.0.0.1:8000/chat');
+      setConversations(response.data);
+
+      if (response.data.length > 0) {
+        setCurConversationIndex(response.data.length - 1);
+      }
+    } catch (error) {
+      console.error('Failed to fetch threads:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchThreadIds();
+    const interval = setInterval(fetchThreadIds, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (curConversationIndex === -1 || curConversationIndex >= conversations.length) {
+      return;
+    }
+
+    const threadId = conversations[curConversationIndex].thread_id;
+    fetchChatHistory(threadId);
+  }, [curConversationIndex, conversations]);
+
+  const fetchChatHistory = async (threadId: string) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://127.0.0.1:8000/chat?thread_id=${threadId}`);
+      setConversationMessages(threadId, response.data.messages || []);
+    } catch (error) {
+      console.error('Failed to fetch chat history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleThreadClick = (threadId: string, index: number) => {
+    setCurConversationIndex(index); // Active state ko pehle set karein
+    router.push(`/chat/${threadId}`);
+  };
+  
+  const handleNewConversation = async () => {
+    setCurConversationIndex(-1);
+    clearChatState();
+    router.push('/');
+  };
+
   return (
-    <li key={props.index} onClick={props.onClick} className="my-2">
-      <a className={props.isActive ? 'active' : ''}>
-        <div className="flex flex-col h-full w-full">
-          <div className="">{props.title}</div>
-          <div className="flex justify-between h-full menu-title">
-            <div>Messages: {props.messageCount}</div>
-            <div className="ml-2">{props.timeText}</div>
+    <div className="top-0 p-2 flex flex-col relative max-h-[100vh] h-[100vh] shadow-xl rounded-lg bg-gradient-to-b from-[#282A36] via-[#282A36] to-[#3A3C49]">
+      <div className="bg-[#282A36] bg-opacity-90 backdrop-blur sticky top-0 items-center gap-2 px-4 py-2 rounded-md shadow-xl">
+        <div className="font-title transition-all duration-200 md:text-2xl">
+          <div className="my-1 text-xl font-bold capitalize">
+            Ai Data Reporting
           </div>
         </div>
-      </a>
-    </li>
-  );
-};
-
-export const Sidebar = () => {
-  const [conversations, curConversationIndex] = useChatStore((state) => [
-    state.conversations,
-    state.curConversationIndex,
-  ]);
-  const chatStore = useChatStore();
-  return (
-    <div className="top-0 p-2 flex flex-col relative max-h-[100vh] h-[100vh]">
-      <div className="bg-base-200 bg-opacity-90 backdrop-blur sticky top-0 items-center gap-2 px-4 py-2">
-
-          <div className="font-title transition-all duration-200 md:text-2xl">
-            <div className="my-1 text-xl font-bold capitalize">Ai Data Reporting</div>
-          </div>
-        <div className="text-base-content text-xs opacity-40 font-bold px-2">
-          AI assitant running in browser.
+        <div className="text-base-content text-xs opacity-60 font-bold">
+          AI assistant running in browser.
         </div>
       </div>
-      <div className="overflow-auto flex-1 overflow-x-hidden ">
-        <ul className="menu menu-compact menu-vertical flex flex-col p-0 px-4">
+      <div className="overflow-auto flex-1 overflow-x-hidden">
+        <ul className="menu menu-compact menu-vertical flex flex-col">
           {conversations.map((item, i) => (
-            <ChatItem
-              key={item.id}
-              index={i}
-              title={item.title}
-              messageCount={item.messages.length}
-              isActive={i === curConversationIndex}
-              timeText={item.updateTime}
-              onClick={() => chatStore.chooseConversation(i)}
-            />
+            <li
+            key={item.thread_id}
+            onClick={() => handleThreadClick(item.thread_id, i)}
+            className={`cursor-pointer transition-all duration-150 ease-in-out rounded-md p-2 mb-2
+              ${i === curConversationIndex ? 'bg-blue-600 text-white shadow-md scale-95' : ''}`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-sm w-[180px] truncate">{item.heading || "New Chat"}</div>
+              <div className="text-xs text-gray-400 flex-1 pl-2 text-right opacity-80">
+                {item.messages?.length > 0 && `Messages: ${item.messages.length}`}
+              </div>
+            </div>
+          </li>
+          
           ))}
         </ul>
-        <div className="from-base-200 pointer-events-none sticky bottom-0 flex h-20 bg-gradient-to-t to-transparent" />
       </div>
-      <BottomSettings />
+      <BottomSettings onNewConversation={handleNewConversation} />
     </div>
   );
 };
+
+export default Sidebar;
