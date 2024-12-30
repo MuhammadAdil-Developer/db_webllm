@@ -46,7 +46,7 @@ export function ChatBox({ threadId }: { threadId: string }) {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://20.81.171.209:8080/chat?thread_id=${threadId}`);
+        const response = await axios.get(`https://aicallcenter.us/chat?thread_id=${threadId}`);
         
         const threadData = response.data[0];
         
@@ -146,8 +146,8 @@ export function ChatBox({ threadId }: { threadId: string }) {
       ]);
   
       const url = currentThreadId
-        ? `http://20.81.171.209:8080/chat?thread_id=${currentThreadId}`
-        : 'http://20.81.171.209:8080/chat';
+        ? `https://aicallcenter.us/chat?thread_id=${currentThreadId}`
+        : 'https://aicallcenter.us/chat';
   
       const response = await axios.post(url, {
         message: newUserMessage.content,
