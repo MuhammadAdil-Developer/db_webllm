@@ -51,11 +51,11 @@ export const Sidebar = () => {
   const fetchThreadIds = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/chat');
+      const response = await axios.get('http://20.81.171.209:8080/chat');
       setConversations(response.data);
 
       if (response.data.length > 0) {
-        setCurConversationIndex(response.data.length - 1);
+        setCurConversationIndex(0); // Select the topmost conversation
       }
     } catch (error) {
       console.error('Failed to fetch threads:', error);
@@ -66,10 +66,8 @@ export const Sidebar = () => {
 
   useEffect(() => {
     fetchThreadIds();
-    const interval = setInterval(fetchThreadIds, 10000);
-    return () => clearInterval(interval);
   }, []);
-
+  
   useEffect(() => {
     if (curConversationIndex === -1 || curConversationIndex >= conversations.length) {
       return;
@@ -82,7 +80,7 @@ export const Sidebar = () => {
   const fetchChatHistory = async (threadId: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8000/chat?thread_id=${threadId}`);
+      const response = await axios.get(`http://20.81.171.209:8080/chat?thread_id=${threadId}`);
       setConversationMessages(threadId, response.data.messages || []);
     } catch (error) {
       console.error('Failed to fetch chat history:', error);
@@ -114,30 +112,35 @@ export const Sidebar = () => {
           AI assistant running in browser.
         </div>
       </div>
-      <div className="overflow-auto flex-1 overflow-x-hidden">
-        <ul className="menu menu-compact menu-vertical flex flex-col">
-          {conversations.map((item, i) => (
-            <li
-            key={item.thread_id}
-            onClick={() => handleThreadClick(item.thread_id, i)}
-            className={`cursor-pointer transition-all duration-150 ease-in-out rounded-md p-2 mb-2
-              ${i === curConversationIndex ? 'bg-blue-600 text-white shadow-md scale-95' : ''}`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="text-sm w-[180px] truncate">{item.heading || "New Chat"}</div>
-              <div className="text-xs text-gray-400 flex-1 pl-2 text-right opacity-80">
-                {item.messages?.length > 0 && `Messages: ${item.messages.length}`}
-              </div>
-            </div>
-          </li>
-          
-          ))}
-        </ul>
-      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center flex-1">
+          <div className="loader animate-spin"></div>
+        </div>
+      ) : (
+        <div className="overflow-auto flex-1 overflow-x-hidden">
+          <ul className="menu menu-compact menu-vertical flex flex-col">
+            {conversations.map((item, i) => (
+              <li
+                key={item.thread_id}
+                onClick={() => handleThreadClick(item.thread_id, i)}
+                className={`cursor-pointer transition-all duration-150 ease-in-out rounded-md p-2 mb-2
+                  ${i === curConversationIndex ? 'bg-blue-600 text-white shadow-md scale-95' : ''}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-sm w-[180px] truncate">{item.heading || "New Chat"}</div>
+                  <div className="text-xs text-gray-400 flex-1 pl-2 text-right opacity-80">
+                    {item.messages?.length > 0 && `Messages: ${item.messages.length}`}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <BottomSettings onNewConversation={handleNewConversation} />
     </div>
   );
 };
 
 export default Sidebar;
-

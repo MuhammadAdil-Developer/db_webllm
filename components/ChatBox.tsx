@@ -31,55 +31,75 @@ function useScrollToBottom() {
   };
 }
 
-const shouldSubmit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-  if (e.key !== 'Enter') return false;
-  if (e.key === 'Enter' && e.nativeEvent.isComposing) return false;
-  return e.ctrlKey;
-};
-
 export function ChatBox({ threadId }: { threadId: string }) {
   const [userInput, setUserInput] = useState('');
   const [messages, setMessages] = useState<
-  { type: "user" | "assistant"; content: string; timestamp: string; isLoading?: boolean }[]
->([]);
-
+    { type: "user" | "assistant"; content: string; timestamp: string; isLoading?: boolean }[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const { scrollRef, setAutoScroll, scrollToBottom } = useScrollToBottom();
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(threadId);
   const chatStore = useChatStore();
-  const [conversations, setConversations] = useState([]);
+  const [heading, setHeading] = useState<string>('AI Data Reporting');
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://127.0.0.1:8000/chat?thread_id=${threadId}`);
-  
-        // Extract human and AI messages
-        const humanMessages = response.data.human_message || [];
-        const aiResponses = response.data.Ai_response || [];
-  
-        // Create paired message array
+        const response = await axios.get(`http://20.81.171.209:8080/chat?thread_id=${threadId}`);
         
+        const threadData = response.data[0];
+        
+        if (!threadData) {
+          console.error('No thread data found');
+          return;
+        }
+
+        const { human_message, ai_response, heading: apiHeading } = threadData;
+
+        // Set the heading dynamically from the API response
+        if (apiHeading) {
+          setHeading(apiHeading);
+        }
+
+        // Create an interleaved array of messages
         const allMessages: { type: 'user' | 'assistant'; content: string; timestamp: string }[] = [];
-        const maxLength = Math.max(humanMessages.length, aiResponses.length);
+        
+        // Assuming human_message and ai_response arrays are of same length and correspond to each other
+        const maxLength = Math.max(human_message?.length || 0, ai_response?.length || 0);
+        
         for (let i = 0; i < maxLength; i++) {
-          if (humanMessages[i]) {
+          // Add human message if it exists
+          if (human_message?.[i]) {
             allMessages.push({
               type: 'user',
-              content: humanMessages[i],
-              timestamp: new Date().toLocaleTimeString(),
+              content: human_message[i],
+              timestamp: new Date(Date.now() - (maxLength - i) * 60000).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              })
             });
           }
-          if (aiResponses[i]) {
+          
+          // Add AI response if it exists
+          if (ai_response?.[i]) {
             allMessages.push({
               type: 'assistant',
-              content: aiResponses[i],
-              timestamp: new Date().toLocaleTimeString(),
+              content: ai_response[i],
+              timestamp: new Date(Date.now() - (maxLength - i) * 60000).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              })
             });
           }
         }
-  
+
         setMessages(allMessages);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -87,12 +107,11 @@ export function ChatBox({ threadId }: { threadId: string }) {
         setLoading(false);
       }
     };
-  
+
     if (threadId) {
       fetchMessages();
     }
   }, [threadId]);
-  
 
   const submitUserInput = async () => {
     if (userInput.trim().length === 0 || loading) return;
@@ -108,23 +127,8 @@ export function ChatBox({ threadId }: { threadId: string }) {
       });
     };
   
-    const fetchThreads = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/chat');
-        setConversations(response.data);  // Update conversations after the new message or thread is created
-      } catch (error) {
-        console.error('Failed to fetch threads:', error);
-      }
-    };
-  
-    interface Message {
-      type: "assistant" | "user";
-      content: string;
-      timestamp: string;
-      isLoading?: boolean;
-    }
-    const newUserMessage: Message = {
-      type: "user", 
+    const newUserMessage = {
+      type: "user" as const,
       content: userInput,
       timestamp: getCurrentTimestamp(),
     };
@@ -142,22 +146,24 @@ export function ChatBox({ threadId }: { threadId: string }) {
       ]);
   
       const url = currentThreadId
-        ? `http://127.0.0.1:8000/chat?thread_id=${currentThreadId}`
-        : 'http://127.0.0.1:8000/chat';
+        ? `http://20.81.171.209:8080/chat?thread_id=${currentThreadId}`
+        : 'http://20.81.171.209:8080/chat';
   
-      // Now we can safely reference newUserMessage
       const response = await axios.post(url, {
         message: newUserMessage.content,
+        chat_type: "Q&A with stored SQL-DB",
+        app_functionality: "Chat",
       });
   
       const data = response.data;
-      const aiResponse = data.Ai_response?.[0] || 'No response received.';
+  
+      // Get the latest AI response
+      const aiResponse = data.ai_response?.slice(-1)[0] || 'No response received.';
   
       if (data.thread_id) {
         setCurrentThreadId(data.thread_id);
         window.history.pushState({}, '', `/chat/${data.thread_id}`);
-        
-        // Trigger sidebar refresh after getting new thread_id
+  
         if ((window as any).refreshSidebarThreads) {
           (window as any).refreshSidebarThreads();
         }
@@ -172,8 +178,6 @@ export function ChatBox({ threadId }: { threadId: string }) {
         };
         return updatedMessages;
       });
-  
-      await fetchThreads();
     } catch (error) {
       console.error('Error fetching AI response:', error);
       setMessages((prev) => [
@@ -187,20 +191,12 @@ export function ChatBox({ threadId }: { threadId: string }) {
   };
   
 
-
-  
-  const onInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (shouldSubmit(e)) {
-      submitUserInput();
-    }
-  };
-
   return (
     <div className="top-0 p-2 flex flex-col relative max-h-[100vh] h-[100vh]">
-      {/* Header and other UI elements */}
+      {/* Header */}
       <div className="w-full px-4 flex justify-between items-center py-2 border-b border-solid border-black border-opacity-10">
         <div className="transition-all duration-200">
-          <div className="my-1 text-xl font-bold">AI Data Reporting</div>
+          <div className="my-1 text-xl font-bold">{heading}</div> {/* Dynamic heading */}
           <div className="text-base-content text-xs opacity-40 font-bold">
             {messages.length} messages
           </div>
@@ -210,7 +206,7 @@ export function ChatBox({ threadId }: { threadId: string }) {
             onClick={() => {
               const conversationName = window.prompt('Enter name: ');
               if (!conversationName) return;
-              setCurrentThreadId('new-thread-id'); // Update to new thread ID
+              setCurrentThreadId('new-thread-id');
             }}
             className="btn btn-ghost btn-xs"
           >
@@ -221,6 +217,7 @@ export function ChatBox({ threadId }: { threadId: string }) {
           </button>
         </div>
       </div>
+
 
       {/* Welcome Section */}
       {messages.length === 0 && (
@@ -244,91 +241,87 @@ export function ChatBox({ threadId }: { threadId: string }) {
         </div>
       )}
 
-{/* Messages */}
-<div className="h-full overflow-auto py-4 border-b border-solid border-black border-opacity-10">
-  {messages.map((item, i) => (
-    <div key={i} className={`chat ${item.type === 'user' ? 'chat-end' : 'chat-start'}`}>
-      <div className="chat-image avatar">
-        <div className="w-10 rounded-full">
-          <img
-            src={item.type === 'assistant' ? '/vicuna.jpeg' : '/user.jpg'}
-            alt=""
-            width={40}
-            height={40}
-          />
-        </div>
-      </div>
-      <div className="chat-bubble">
-        {/* Show content or loader */}
-        {item.isLoading ? (
-          <div className="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+      {/* Messages */}
+      <div 
+        ref={scrollRef}
+        className="h-full overflow-auto py-4 border-b border-solid border-black border-opacity-10"
+      >
+        {messages.map((item, i) => (
+          <div key={i} className={`chat ${item.type === 'user' ? 'chat-end' : 'chat-start'}`}>
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full">
+                <img
+                  src={item.type === 'assistant' ? '/vicuna.jpeg' : '/user.jpg'}
+                  alt=""
+                  width={40}
+                  height={40}
+                />
+              </div>
+            </div>
+            <div className="chat-bubble">
+              {item.isLoading ? (
+                <div className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              ) : (
+                <div>{item.content}</div>
+              )}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">{item.timestamp}</div>
           </div>
-        ) : (
-          <div>{item.content}</div>
+        ))}
+        {!messages.some((item) => item.isLoading) && loading && (
+          <div className="chat chat-start">
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full">
+                <img src="/vicuna.jpeg" alt="" width={40} height={40} />
+              </div>
+            </div>
+            <div className="chat-bubble">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-      <div className="text-xs text-gray-500 mt-1">{item.timestamp}</div>
-    </div>
-  ))}
-  {/* Loader shown only if loading is true and no other loader is present */}
-  {!messages.some((item) => item.isLoading) && loading && (
-    <div className="chat chat-start">
-      <div className="chat-image avatar">
-        <div className="w-10 rounded-full">
-          <img src="/vicuna.jpeg" alt="" width={40} height={40} />
+
+      {/* Input Area */}
+      <div className="relative bottom-0 p-4">
+        <div className="bg-base-100 flex items-center justify-center h-full z-30 relative">
+          <div className="relative w-[50%]">
+            <textarea
+              className="textarea textarea-primary textarea-bordered textarea-sm w-full pr-10 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-200 transition-all duration-300 ease-in-out"
+              placeholder="What insights are you looking for today?"
+              value={userInput}
+              onChange={(e) => setUserInput(e.currentTarget.value)}
+              onFocus={(e) => {
+                setAutoScroll(true);
+                e.target.classList.add('textarea-focus');
+              }}
+              onBlur={(e) => {
+                setAutoScroll(false);
+                e.target.classList.remove('textarea-focus');
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                  submitUserInput();
+                }
+              }}
+            />
+            <button
+              onClick={submitUserInput}
+              className="absolute top-5 right-2 btn btn-ghost btn-xs flex items-center justify-center"
+            >
+              <IconSend />
+            </button>
+          </div>
         </div>
       </div>
-      <div className="chat-bubble">
-        <div className="typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </div>
-    </div>
-  )}
-</div>
-
-<div className="relative bottom-0 p-4">
-  <div className="bg-base-100 flex items-center justify-center h-full z-30 relative">
-    <div className="relative w-[50%]">
-    <textarea
-  className="textarea textarea-primary textarea-bordered textarea-sm w-full pr-10 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-200 transition-all duration-300 ease-in-out"
-  placeholder="What insights are you looking for today?"
-  value={userInput}
-  onChange={(e) => setUserInput(e.currentTarget.value)}
-  onFocus={(e) => {
-    setAutoScroll(true);
-    e.target.classList.add('textarea-focus');
-  }}
-  onBlur={(e) => {
-    setAutoScroll(false);
-    e.target.classList.remove('textarea-focus');
-  }}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-      submitUserInput();
-    }
-  }}
-/>
-
-      {/* Button inside the textarea */}
-      <button
-        onClick={submitUserInput}
-        className="absolute top-5 right-2 btn btn-ghost btn-xs flex items-center justify-center"
-      >
-        <IconSend />
-      </button>
-    </div>
-  </div>
-</div>
-
     </div>
   );
 }
-
-
-
