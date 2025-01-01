@@ -116,16 +116,7 @@ export function ChatBox({ threadId }: { threadId: string }) {
   const submitUserInput = async () => {
     if (userInput.trim().length === 0 || loading) return;
   
-    const getCurrentTimestamp = () => {
-      const now = new Date();
-      return now.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
-    };
+    const getCurrentTimestamp = () => new Date().toLocaleString();
   
     const newUserMessage = {
       type: "user" as const,
@@ -135,22 +126,16 @@ export function ChatBox({ threadId }: { threadId: string }) {
   
     setMessages((prev) => [...prev, newUserMessage]);
     setUserInput("");
-    setAutoScroll(true);
   
     try {
       setLoading(true);
   
-      setMessages((prev) => [
-        ...prev,
-        { type: 'assistant', content: '', timestamp: getCurrentTimestamp(), isLoading: true },
-      ]);
-  
       const url = currentThreadId
         ? `https://aicallcenter.us/chat?thread_id=${currentThreadId}`
-        : 'https://aicallcenter.us/chat';
+        : "https://aicallcenter.us/chat";
   
       const response = await axios.post(url, {
-        message: newUserMessage.content,
+        question: newUserMessage.content,
         chat_type: "Q&A with stored SQL-DB",
         app_functionality: "Chat",
       });
@@ -158,37 +143,37 @@ export function ChatBox({ threadId }: { threadId: string }) {
       const data = response.data;
   
       // Get the latest AI response
-      const aiResponse = data.ai_response?.slice(-1)[0] || 'No response received.';
+      const aiResponse = data.ai_response?.slice(-1)[0] || "No response received.";
   
       if (data.thread_id) {
         setCurrentThreadId(data.thread_id);
-        window.history.pushState({}, '', `/chat/${data.thread_id}`);
+        window.history.pushState({}, "", `/chat/${data.thread_id}`);
   
         if ((window as any).refreshSidebarThreads) {
           (window as any).refreshSidebarThreads();
         }
       }
   
-      setMessages((prev) => {
-        const updatedMessages = [...prev];
-        updatedMessages[updatedMessages.length - 1] = {
-          type: 'assistant',
-          content: aiResponse,
-          timestamp: getCurrentTimestamp(),
-        };
-        return updatedMessages;
-      });
-    } catch (error) {
-      console.error('Error fetching AI response:', error);
+      setMessages((prev) => [
+        ...prev,
+        { type: "assistant", content: aiResponse, timestamp: getCurrentTimestamp() },
+      ]);
+    } catch (error: any) {
       setMessages((prev) => [
         ...prev.slice(0, -1),
-        { type: 'assistant', content: 'Failed to get a response. Please try again.', timestamp: getCurrentTimestamp() },
+        {
+          type: "assistant",
+          content: "Failed to get a response. Please try again.",
+          timestamp: getCurrentTimestamp(),
+        },
       ]);
+      alert(error.response?.data?.detail || "An unexpected error occurred.");
     } finally {
       setLoading(false);
       scrollToBottom();
     }
   };
+  
   
 
   return (
@@ -325,3 +310,4 @@ export function ChatBox({ threadId }: { threadId: string }) {
     </div>
   );
 }
+

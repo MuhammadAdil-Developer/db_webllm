@@ -80,3 +80,71 @@
     transform: rotate(360deg);
   }
 }
+
+.modal-box {
+  position: relative;
+  overflow: visible;
+  z-index: 1000;
+}
+
+
+.tooltip-container {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip-icon {
+  font-size: 18px;
+  font-weight: bold;
+  color: #007bff;
+  background-color: #e0f7ff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tooltip-content {
+  visibility: hidden;
+  width: auto; 
+  max-width: 600px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 120%;
+  right: 0; 
+  z-index: 1050; 
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  white-space: normal;
+
+}
+
+.tooltip-container:hover .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.loader {
+  border: 2px solid transparent;
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
