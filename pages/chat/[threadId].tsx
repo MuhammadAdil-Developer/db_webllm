@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { ChatBox } from '../../components/ChatBox';
 import { InitModal, InstructionModal } from '@/components/InitModal';
-
 import { useChatStore } from '@/store/chat';
 import axios from 'axios';
 
@@ -40,13 +39,10 @@ function ChatPage() {
     setWorkerConversationHistroy();
   }, [setWorkerConversationHistroy]);
 
-  const router = useRouter()
+  const router = useRouter();
   const { threadId } = router.query;
 
-  const loading = !useHasHydrated();
-  if (loading) {
-    return <Loading />;
-  }
+  const hasHydrated = useHasHydrated();  // Ensure this is called unconditionally
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -63,7 +59,12 @@ function ChatPage() {
     fetchUsername();
   }, []);
 
+  // Conditionally render modals based on username
   const showModals = username === 'a51nha';
+
+  if (!hasHydrated) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -80,7 +81,7 @@ function ChatPage() {
         </div>
       </div>
 
-      {/* Conditionally render modals based on username */}
+      {/* Conditionally render modals after username is fetched */}
       {showModals && <InitModal />}
       {showModals && <InstructionModal />}
     </>
