@@ -57,19 +57,15 @@ export function ChatBox({ threadId }: { threadId: string }) {
 
         const { human_message, ai_response, heading: apiHeading } = threadData;
 
-        // Set the heading dynamically from the API response
         if (apiHeading) {
           setHeading(apiHeading);
         }
 
-        // Create an interleaved array of messages
         const allMessages: { type: 'user' | 'assistant'; content: string; timestamp: string }[] = [];
         
-        // Assuming human_message and ai_response arrays are of same length and correspond to each other
         const maxLength = Math.max(human_message?.length || 0, ai_response?.length || 0);
         
         for (let i = 0; i < maxLength; i++) {
-          // Add human message if it exists
           if (human_message?.[i]) {
             allMessages.push({
               type: 'user',

@@ -4,24 +4,41 @@ import axios from 'axios';
 import { IconAdd, IconInfo, IconSetting } from './Icons';
 import { useChatStore } from '@/store/chat';
 
-function BottomSettings({ onNewConversation }: { onNewConversation: () => void }) {
+function BottomSettings({ onNewConversation, userRole }: { onNewConversation: () => void, userRole: string }) {
   const chatStore = useChatStore();
+  const isDisabled = userRole === 'A';
 
   return (
     <div className="flex items-center justify-between py-5 relative bottom-0 px-4">
       <div className="flex">
-        <button
-          onClick={() => chatStore.toggleInstuctionModal(true)}
-          className="btn btn-ghost btn-xs"
+        <div
+          className={`tooltip pl-3 ${isDisabled ? 'cursor-not-allowed' : ''}`}
+          data-tip="connect DB"
+          data-place="top"
         >
-          <IconInfo />
-        </button>
-        <div className="tooltip" data-tip="in developing...">
-          <button className="btn btn-ghost btn-xs">
+          <button
+            onClick={() => !isDisabled && chatStore.toggleInstuctionModal(true)}
+            className={`btn btn-ghost btn-xs -ml-2 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isDisabled}
+          >
+            <IconInfo />
+          </button>
+        </div>
+
+        <div 
+          className={`tooltip pl-3 ${isDisabled ? 'cursor-not-allowed' : ''}`}
+          data-tip="in developing..." 
+          data-place="top"
+        >
+          <button 
+            className={`btn btn-ghost btn-xs -ml-2 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isDisabled}
+          >
             <IconSetting />
           </button>
         </div>
       </div>
+
       <button
         onClick={onNewConversation}
         className="btn btn-ghost btn-xs"
@@ -32,9 +49,11 @@ function BottomSettings({ onNewConversation }: { onNewConversation: () => void }
   );
 }
 
+
 export const Sidebar = () => {
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const router = useRouter();
   const {
     curConversationIndex,
@@ -53,9 +72,13 @@ export const Sidebar = () => {
       setLoading(true);
       const response = await axios.get('https://aicallcenter.us/chat');
       setConversations(response.data);
+      // Set user role from API response
+      if (response.data.length > 0 && response.data[0].role) {
+        setUserRole(response.data[0].role);
+      }
 
       if (response.data.length > 0) {
-        setCurConversationIndex(0); // Select the topmost conversation
+        setCurConversationIndex(0);
       }
     } catch (error) {
       console.error('Failed to fetch threads:', error);
@@ -90,7 +113,7 @@ export const Sidebar = () => {
   };
 
   const handleThreadClick = (threadId: string, index: number) => {
-    setCurConversationIndex(index); // Active state ko pehle set karein
+    setCurConversationIndex(index);
     router.push(`/chat/${threadId}`);
   };
   
@@ -138,7 +161,7 @@ export const Sidebar = () => {
           </ul>
         </div>
       )}
-      <BottomSettings onNewConversation={handleNewConversation} />
+      <BottomSettings onNewConversation={handleNewConversation} userRole={userRole} />
     </div>
   );
 };
