@@ -9,7 +9,7 @@ import { useChatStore } from '@/store/chat';
 export function Loading() {
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
-      {/* Add any loading content here */}
+
     </div>
   );
 }
@@ -35,11 +35,11 @@ function ChatPage() {
   const setWorkerConversationHistroy = useChatStore((state) => state.setWorkerConversationHistroy);
 
   useEffect(() => {
-    setWorkerConversationHistroy();  // Call the function to update state
-  }, [setWorkerConversationHistroy]);  // Dependency array for useEffect
-
-  const router = useRouter();  // Move useRouter to the top of the component
-  const { threadId } = router.query; // Get thread_id from URL
+    setWorkerConversationHistroy();
+  }, [setWorkerConversationHistroy]);
+ 
+  const router = useRouter();
+  const { threadId } = router.query;
 
   const loading = !useHasHydrated();
   if (loading) {
@@ -60,8 +60,7 @@ function ChatPage() {
           </aside>
         </div>
       </div>
-      <InitModal />
-      <InstructionModal />
+ 
     </>
   );
 }

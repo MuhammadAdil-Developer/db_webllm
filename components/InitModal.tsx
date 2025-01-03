@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-
-
+import React, { useEffect, useState } from 'react';
 import { useChatStore } from '@/store/chat';
 
 function InitItem(props: { content: string; isError: boolean }) {
@@ -15,8 +13,28 @@ function InitItem(props: { content: string; isError: boolean }) {
 
 export function InitModal() {
   const [initInfoTmp] = useChatStore((state) => [state.initInfoTmp]);
+  const [role, setRole] = useState<string>(''); // State to hold the role value
 
   const chatStore = useChatStore();
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const response = await fetch('https://aicallcenter.us/chat');
+        const data = await response.json();
+        setRole(data.role);
+      } catch (error) {
+        console.error('Error fetching role:', error);
+      }
+    };
+
+    fetchRole();
+  }, []);
+
+  if (role === 'A') {
+    return null;
+  }
+
   return (
     <>
       <div className={`modal ${initInfoTmp.showModal ? 'modal-open' : ''}`}>
@@ -46,6 +64,7 @@ export function InitModal() {
   );
 }
 
+
 export function InstructionModal() {
   const [instructionModalStatus] = useChatStore((state) => [
     state.instructionModalStatus,
@@ -54,7 +73,7 @@ export function InstructionModal() {
 
   const [dbType, setDbType] = useState('');
   const [connectionURL, setConnectionURL] = useState('');
-  const [databaseName, setDatabaseName] = useState(''); // New state for database name
+  const [databaseName, setDatabaseName] = useState('');
   const [collectionName, setCollectionName] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
   const [responseError, setResponseError] = useState('');
@@ -63,14 +82,14 @@ export function InstructionModal() {
   const [touched, setTouched] = useState({
     dbType: false,
     connectionURL: false,
-    databaseName: false, // Added for new field
+    databaseName: false,
     collectionName: false
   });
 
   const [errors, setErrors] = useState({
     dbType: '',
     connectionURL: '',
-    databaseName: '', // Added for new field
+    databaseName: '',
     collectionName: ''
   });
 
@@ -280,10 +299,10 @@ export function InstructionModal() {
         <button
           className={`btn ${isLoading ? 'btn-disabled' : ''}`}
           onClick={handleSubmit}
-          disabled={isLoading} // Disable the button while loading
+          disabled={isLoading}
         >
           {isLoading ? (
-            <span className="loader"></span> // Replace with your loader component or spinner
+            <span className="loader"></span>
           ) : (
             'Save and Connect'
           )}
@@ -291,7 +310,7 @@ export function InstructionModal() {
         <button
           className="btn btn-secondary"
           onClick={() => chatStore.toggleInstuctionModal(false)}
-          disabled={isLoading} // Optionally disable cancel while loading
+          disabled={isLoading} 
         >
           Cancel
         </button>
