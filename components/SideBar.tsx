@@ -71,7 +71,7 @@ export const Sidebar = () => {
   const fetchThreadIds = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/chat');
+      const response = await axios.get('https://aicallcenter.us/chat');
       setConversations(response.data);
       // Set user role from API response
       if (response.data.length > 0 && response.data[0].username) {
