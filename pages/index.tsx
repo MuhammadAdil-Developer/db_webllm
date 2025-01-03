@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-
 import { InitModal, InstructionModal } from '@/components/InitModal';
-
 import { useChatStore } from '@/store/chat';
+import axios from 'axios';
 
 export function Loading() {
   return (
@@ -52,27 +50,44 @@ function Home() {
     state.conversations,
   ]);
 
+  const [username, setUsername] = useState<string>('');
+
   useEffect(() => {
     setWorkerConversationHistroy();
   }, [setWorkerConversationHistroy]);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/chat');
+        if (response.data.length > 0 && response.data[0].username) {
+          setUsername(response.data[0].username);
+        }
+      } catch (error) {
+        console.error('Failed to fetch username:', error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
 
   const loading = !useHasHydrated();
   if (loading) {
     return <Loading />;
   }
 
-  // Get the current threadId from the conversations state
   const threadId = curConversationIndex >= 0 && curConversationIndex < conversations.length
-  ? conversations[curConversationIndex].thread_id
-  : '';
+    ? conversations[curConversationIndex].thread_id
+    : '';
 
+  const showModals = username === 'a51nha';
 
   return (
     <>
       <div className="bg-base-100 drawer drawer-mobile">
         <input id="my-drawer" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content p-2">
-          {/* Pass the threadId prop to ChatBox */}
+
           <ChatBox threadId={threadId} />
         </div>
         <div className="drawer-side">
@@ -82,11 +97,11 @@ function Home() {
           </aside>
         </div>
       </div>
+
+      {showModals && <InitModal />}
+      {showModals && <InstructionModal />}
     </>
   );
 }
 
 export default Home;
-
-
-

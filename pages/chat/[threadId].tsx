@@ -5,11 +5,12 @@ import { ChatBox } from '../../components/ChatBox';
 import { InitModal, InstructionModal } from '@/components/InitModal';
 
 import { useChatStore } from '@/store/chat';
+import axios from 'axios';
 
 export function Loading() {
   return (
     <div className="flex flex-col justify-center items-center h-full w-full">
-
+      {/* Add any loading content here */}
     </div>
   );
 }
@@ -32,19 +33,37 @@ const useHasHydrated = () => {
 };
 
 function ChatPage() {
+  const [username, setUsername] = useState<string>('');
   const setWorkerConversationHistroy = useChatStore((state) => state.setWorkerConversationHistroy);
 
   useEffect(() => {
     setWorkerConversationHistroy();
   }, [setWorkerConversationHistroy]);
- 
-  const router = useRouter();
+
+  const router = useRouter()
   const { threadId } = router.query;
 
   const loading = !useHasHydrated();
   if (loading) {
     return <Loading />;
   }
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8080/chat');
+        if (response.data.length > 0 && response.data[0].username) {
+          setUsername(response.data[0].username); // Set username state
+        }
+      } catch (error) {
+        console.error('Failed to fetch username:', error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
+
+  const showModals = username === 'a51nha';
 
   return (
     <>
@@ -60,7 +79,10 @@ function ChatPage() {
           </aside>
         </div>
       </div>
- 
+
+      {/* Conditionally render modals based on username */}
+      {showModals && <InitModal />}
+      {showModals && <InstructionModal />}
     </>
   );
 }

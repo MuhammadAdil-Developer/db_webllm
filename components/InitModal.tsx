@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+
+
 import { useChatStore } from '@/store/chat';
 
 function InitItem(props: { content: string; isError: boolean }) {
@@ -13,29 +15,9 @@ function InitItem(props: { content: string; isError: boolean }) {
 
 export function InitModal() {
   const [initInfoTmp] = useChatStore((state) => [state.initInfoTmp]);
-  const [role, setRole] = useState<string>(''); // State to hold the role value
 
   const chatStore = useChatStore();
-
-  useEffect(() => {
-    const fetchRole = async () => {
-      try {
-        const response = await fetch('https://aicallcenter.us/chat');
-        const data = await response.json();
-        setRole(data.role);
-      } catch (error) {
-        console.error('Error fetching role:', error);
-      }
-    };
-
-    fetchRole();
-  }, []);
-
-  if (role === 'A') {
-    return null;
-  }
-
-  return (
+    return (
     <>
       <div className={`modal ${initInfoTmp.showModal ? 'modal-open' : ''}`}>
         <div className="modal-box w-11/12 max-w-5xl">

@@ -4,9 +4,10 @@ import axios from 'axios';
 import { IconAdd, IconInfo, IconSetting } from './Icons';
 import { useChatStore } from '@/store/chat';
 
-function BottomSettings({ onNewConversation, userRole }: { onNewConversation: () => void, userRole: string }) {
+function BottomSettings({ onNewConversation, username }: { onNewConversation: () => void, username: string }) {
   const chatStore = useChatStore();
-  const isDisabled = userRole === 'A';
+
+  const isDisabled = username !== 'a51nha';
 
   return (
     <div className="flex items-center justify-between py-5 relative bottom-0 px-4">
@@ -70,14 +71,13 @@ export const Sidebar = () => {
   const fetchThreadIds = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://aicallcenter.us/chat');
+      const response = await axios.get('http://127.0.0.1:8000/chat');
       setConversations(response.data);
       // Set user role from API response
-      if (response.data.length > 0 && response.data[0].role) {
-        setUserRole(response.data[0].role);
+      if (response.data.length > 0 && response.data[0].username) {
+        setUserRole(response.data[0].username);
       }
-
-      if (response.data.length > 0) {
+            if (response.data.length > 0) {
         setCurConversationIndex(0);
       }
     } catch (error) {
@@ -161,8 +161,8 @@ export const Sidebar = () => {
           </ul>
         </div>
       )}
-      <BottomSettings onNewConversation={handleNewConversation} userRole={userRole} />
-    </div>
+    <BottomSettings onNewConversation={handleNewConversation} username={userRole} />
+</div>
   );
 };
 
