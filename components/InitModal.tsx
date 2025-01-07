@@ -139,7 +139,7 @@ export function InstructionModal() {
     }
   
     try {
-      const response = await fetch('https://aicallcenter.us/connect-db', {
+      const response = await fetch('http://127.0.0.1:8000/connect-db', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

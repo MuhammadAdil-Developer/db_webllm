@@ -47,7 +47,7 @@ function ChatPage() {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const response = await axios.get('https://aicallcenter.us/chat');
+        const response = await axios.get('http://127.0.0.1:8000/chat');
         if (response.data.length > 0 && response.data[0].username) {
           setUsername(response.data[0].username); // Set username state
         }
